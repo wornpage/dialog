@@ -6,11 +6,10 @@ interface ScrollLockState {
   scrollX: number;
   scrollY: number;
   rootOverflow: string;
+  rootTouchAction: string;
   bodyOverflow: string;
-  bodyPosition: string;
-  bodyTop: string;
-  bodyLeft: string;
-  bodyWidth: string;
+  bodyTouchAction: string;
+  bodyPaddingRight: string;
 }
 
 const modalStack: HTMLElement[] = [];
@@ -27,19 +26,21 @@ function lockPageScroll() {
     scrollX: window.scrollX,
     scrollY: window.scrollY,
     rootOverflow: root.style.overflow,
+    rootTouchAction: root.style.touchAction,
     bodyOverflow: body.style.overflow,
-    bodyPosition: body.style.position,
-    bodyTop: body.style.top,
-    bodyLeft: body.style.left,
-    bodyWidth: body.style.width,
+    bodyTouchAction: body.style.touchAction,
+    bodyPaddingRight: body.style.paddingRight,
   };
 
+  const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
+  if (scrollbarWidth > 0) {
+    const paddingRight = Number.parseFloat(getComputedStyle(body).paddingRight) || 0;
+    body.style.paddingRight = `${paddingRight + scrollbarWidth}px`;
+  }
   root.style.overflow = 'hidden';
+  root.style.touchAction = 'none';
   body.style.overflow = 'hidden';
-  body.style.position = 'fixed';
-  body.style.top = `-${scrollLockState.scrollY}px`;
-  body.style.left = `-${scrollLockState.scrollX}px`;
-  body.style.width = '100%';
+  body.style.touchAction = 'none';
 }
 
 function unlockPageScroll() {
@@ -50,12 +51,13 @@ function unlockPageScroll() {
   const root = document.documentElement;
   const body = document.body;
   root.style.overflow = state.rootOverflow;
+  root.style.touchAction = state.rootTouchAction;
   body.style.overflow = state.bodyOverflow;
-  body.style.position = state.bodyPosition;
-  body.style.top = state.bodyTop;
-  body.style.left = state.bodyLeft;
-  body.style.width = state.bodyWidth;
-  window.scrollTo(state.scrollX, state.scrollY);
+  body.style.touchAction = state.bodyTouchAction;
+  body.style.paddingRight = state.bodyPaddingRight;
+  if (window.scrollX !== state.scrollX || window.scrollY !== state.scrollY) {
+    window.scrollTo(state.scrollX, state.scrollY);
+  }
 }
 
 function applyModalIsolation() {

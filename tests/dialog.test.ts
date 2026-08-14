@@ -53,8 +53,12 @@ describe('hydration and interaction contract', () => {
 
   test('locks and restores page position for the complete modal lifecycle', () => {
     expect(modalLayer).toContain("root.style.overflow = 'hidden';");
-    expect(modalLayer).toContain("body.style.position = 'fixed';");
-    expect(modalLayer).toContain('body.style.top = `-${scrollLockState.scrollY}px`;');
+    expect(modalLayer).toContain("root.style.touchAction = 'none';");
+    expect(modalLayer).toContain("body.style.overflow = 'hidden';");
+    expect(modalLayer).toContain("body.style.touchAction = 'none';");
+    expect(modalLayer).toContain('window.innerWidth - root.clientWidth');
+    expect(modalLayer).toContain('body.style.paddingRight = `${paddingRight + scrollbarWidth}px`;');
+    expect(modalLayer).toContain('window.scrollX !== state.scrollX || window.scrollY !== state.scrollY');
     expect(modalLayer).toContain('window.scrollTo(state.scrollX, state.scrollY);');
     expect(source).toContain('current === document.body || activeDialog.contains(current)');
     expect(source).toContain('previous.focus({ preventScroll: true });');
