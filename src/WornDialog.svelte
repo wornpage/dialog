@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import { prefersReducedMotion } from 'svelte/motion';
+	import { activateModalLayer, portal } from './modal-layer';
 
 	interface Props {
 		open?: boolean;
@@ -14,25 +15,32 @@
 	const componentId = $props.id();
 	const titleId = `worn-dialog-title-${componentId}`;
 	let dialogEl = $state<HTMLElement | null>(null);
+	let backdropEl = $state<HTMLElement | null>(null);
 
-	// Focus the dialog when it opens; hand focus back where it was on close.
+	// Keep modal isolation, scroll state, and focus restoration in one lifecycle.
 	$effect(() => {
-		if (open && dialogEl) {
-			if (typeof document !== 'undefined') {
-				const previous = document.activeElement as HTMLElement | null;
-				dialogEl.focus();
-				return () => previous?.focus?.();
+		if (!open || !dialogEl || !backdropEl || typeof document === 'undefined') return;
+		const previous = document.activeElement as HTMLElement | null;
+		const activeDialog = dialogEl;
+		const releaseModalLayer = activateModalLayer(backdropEl);
+		dialogEl.focus();
+
+		return () => {
+			releaseModalLayer();
+			const current = document.activeElement;
+			if (previous?.isConnected && (current === document.body || activeDialog.contains(current))) {
+				previous.focus({ preventScroll: true });
 			}
-		}
+		};
 	});
 
 	function focusables(): HTMLElement[] {
 		if (!dialogEl) return [];
 		return Array.from(
 			dialogEl.querySelectorAll<HTMLElement>(
-				'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+				'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"])'
 			)
-		);
+		).filter((item) => !item.closest('[inert]') && item.getClientRects().length > 0 && getComputedStyle(item).visibility !== 'hidden');
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -70,7 +78,7 @@
 
 {#if open}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="worn-dialog-backdrop" role="presentation" transition:fade={{ duration: prefersReducedMotion.current ? 0 : 200 }} onclick={handleBackdrop}>
+	<div bind:this={backdropEl} use:portal class="worn-dialog-backdrop" role="presentation" transition:fade={{ duration: prefersReducedMotion.current ? 0 : 200 }} onclick={handleBackdrop}>
 		<div
 			class="worn-dialog"
 			class:is-sm={size === 'sm'}
@@ -177,7 +185,11 @@
 		outline-offset: 2px;
 	}
 	.worn-dialog-body {
+		box-sizing: border-box;
 		min-width: 0;
+		max-width: 100%;
+		overflow-x: auto;
+		overflow-wrap: anywhere;
 		padding: 12px 20px 20px;
 	}
 	@media (max-width: 480px) {
