@@ -97,24 +97,29 @@
 	.worn-dialog-backdrop {
 		position: fixed;
 		inset: 0;
+		height: 100vh;
+		height: 100dvh;
+		box-sizing: border-box;
 		z-index: 1000;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		background: rgba(0,0,0,0.35);
 		backdrop-filter: blur(2px);
-		padding: 24px;
-	@media (max-width: 480px) { padding: 8px; }
+		padding: calc(24px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px));
 	}
 	.worn-dialog {
+		box-sizing: border-box;
 		background: var(--cockpit-surface);
 		border: 1px solid var(--cockpit-border);
 		border-radius: var(--cockpit-radius);
 		box-shadow: 0 16px 48px rgba(0,0,0,0.15);
 		width: 460px;
 		max-width: 100%;
-		max-height: calc(100vh - 48px);
+		max-height: 100%;
 		overflow-y: auto;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
 		position: relative;
 	}
 	/* CSP-safe: no unsafe-inline for style-src, so size is a static class
@@ -133,6 +138,8 @@
 		font-weight: 680;
 		color: var(--cockpit-text);
 		margin: 0;
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 	.worn-dialog-close { min-width: 44px; min-height: 44px;
 		position: relative;
@@ -147,6 +154,7 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
+		touch-action: manipulation;
 	}
 	.worn-dialog-close::before,
 	.worn-dialog-close::after {
@@ -169,6 +177,12 @@
 		outline-offset: 2px;
 	}
 	.worn-dialog-body {
+		min-width: 0;
 		padding: 12px 20px 20px;
+	}
+	@media (max-width: 480px) {
+		.worn-dialog-backdrop {
+			padding: calc(8px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) calc(8px + env(safe-area-inset-left, 0px));
+		}
 	}
 </style>

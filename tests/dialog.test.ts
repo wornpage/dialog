@@ -20,4 +20,17 @@ describe('hydration and interaction contract', () => {
     expect(source).toContain('class:is-lg');
     expect(source).toContain('prefersReducedMotion.current');
   });
+
+  test('owns the dynamic viewport and standalone-display safe areas', () => {
+    expect(source).toContain('height: 100dvh;');
+    expect(source).toContain('padding: calc(24px + env(safe-area-inset-top, 0px))');
+    expect(source).toContain('padding: calc(8px + env(safe-area-inset-top, 0px))');
+    expect(source).toContain('max-height: 100%;');
+    expect(source).toContain('overscroll-behavior: contain;');
+  });
+
+  test('contains long titles and keeps touch dismissal responsive', () => {
+    expect(source).toContain('overflow-wrap: anywhere;');
+    expect(source).toContain('touch-action: manipulation;');
+  });
 });
