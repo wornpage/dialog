@@ -1,5 +1,8 @@
 # @wornpage/dialog
 
+> Part of **[Wornpage Components](https://github.com/wornpage/wornpage#component-library)**.
+> [Browse the catalog](https://wornpage.pages.dev) · [Setup guide](https://github.com/wornpage/wornpage/blob/main/docs/getting-started.md) · [Wornpage overview](https://github.com/wornpage/wornpage)
+
 Accessible Svelte 5 modal dialog with focus trapping, static size presets, and reduced-motion transitions.
 
 Dialogs remain inside dynamic mobile viewports and standalone-display safe areas,
